@@ -523,6 +523,8 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
 [Executioner]
   type = Transient
   end_time = 150
+  dt = 0.1
+  dtmin = 1e-4
   # [TimeIntegrator]
   #   type = ExplicitSSPRungeKutta
   #   order = 2
