@@ -390,8 +390,8 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
   [rho_outlet]
     type = PCNSFVStrongBC
     boundary = 'Outlet'
-    variable = pressure
-    T_fluid = ${ambient_temperature}
+    variable = rho
+    # T_fluid = ${ambient_temperature}
     pressure = ${ambient_pressure}
     eqn = 'mass'
   []
@@ -399,7 +399,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
     type = PCNSFVStrongBC
     boundary = 'Outlet'
     variable = rhou
-    T_fluid = ${ambient_temperature}
+    # T_fluid = ${ambient_temperature}
     pressure = ${ambient_pressure}
     eqn = 'momentum'
     momentum_component = x
@@ -408,7 +408,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
     type = PCNSFVStrongBC
     boundary = 'Outlet'
     variable = rhov
-    T_fluid = ${ambient_temperature}
+    # T_fluid = ${ambient_temperature}
     pressure = ${ambient_pressure}
     eqn = 'momentum'
     momentum_component = y
@@ -417,7 +417,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
     type = PCNSFVStrongBC
     boundary = 'Outlet'
     variable = rhow
-    T_fluid = ${ambient_temperature}
+    # T_fluid = ${ambient_temperature}
     pressure = ${ambient_pressure}
     eqn = 'momentum'
     momentum_component = z
@@ -533,10 +533,12 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
   automatic_scaling = true
   # steady_state_detection = false
   # steady_state_tolerance = 1e-10
-  [./TimeStepper]
-    type = PostprocessorDT
-    postprocessor = cfl_dt
-  [../]
+  # [./TimeStepper]
+  #   type = PostprocessorDT
+  #   postprocessor = cfl_dt
+  # [../]
+
+  # dt = 0.1
 []
 # ------------------------------------------------------------------------------
 # Outputs
@@ -544,7 +546,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
 [Outputs]
   exodus = true # Export exodus file
   csv = true # Export csv file with temp. and vel. values
-  interval = 50  # only output every 50 timesteps
+  # interval = 0  # only output every 50 timesteps
 []
 [Postprocessors]
   [cfl_dt]

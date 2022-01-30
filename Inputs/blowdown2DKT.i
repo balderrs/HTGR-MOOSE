@@ -11,7 +11,7 @@
 # MODEL PARAMETERS
 # ------------------------------------------------------------------------------
 ambient_pressure = 101325 # Ambient pressure [Pa]
-ambient_temperature = ${fparse (16.2+273.15)} # Initial temperature [K]
+ambient_temperature = ${fparse 300} # Initial temperature [K]
 # Containment ------------------------------------------------------------------
 T_Cav = ${fparse (33.3774+273.15)} # Initial temperature [K]
 P_Cav = 101325 # Initial pressure [Pa]
@@ -130,27 +130,19 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
 # ------------------------------------------------------------------------------
 [AuxVariables]
   [Ma]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
     block = '1 2'
   []
   [pressure]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
     block = '1 2'
   []
   [U]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
     block = '1 2'
   []
   [temperature]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
     block = '1 2'
   []
   [porosity]
@@ -338,8 +330,8 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
   [rho_outlet]
     type = PCNSFVStrongBC
     boundary = 'Outlet'
-    variable = pressure
-    T_fluid = ${ambient_temperature}
+    variable = rho
+    # T_fluid = ${ambient_temperature}
     pressure = ${ambient_pressure}
     eqn = 'mass'
   []
@@ -347,7 +339,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
     type = PCNSFVStrongBC
     boundary = 'Outlet'
     variable = rhou
-    T_fluid = ${ambient_temperature}
+    # T_fluid = ${ambient_temperature}
     pressure = ${ambient_pressure}
     eqn = 'momentum'
     momentum_component = x
@@ -356,7 +348,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
     type = PCNSFVStrongBC
     boundary = 'Outlet'
     variable = rhov
-    T_fluid = ${ambient_temperature}
+    # T_fluid = ${ambient_temperature}
     pressure = ${ambient_pressure}
     eqn = 'momentum'
     momentum_component = y
@@ -365,7 +357,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
     type = PCNSFVStrongBC
     boundary = 'Outlet'
     variable = rho_et
-    T_fluid = ${ambient_temperature}
+    # T_fluid = ${ambient_temperature}
     pressure = ${ambient_pressure}
     eqn = 'energy'
   []
@@ -465,14 +457,15 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
   #   type = ExplicitSSPRungeKutta
   #   order = 2
   # []
-  l_tol = 1e-6
+  nl_abs_tol = 1e-9
   automatic_scaling = true
   # steady_state_detection = false
   # steady_state_tolerance = 1e-10
-  [./TimeStepper]
-    type = PostprocessorDT
-    postprocessor = cfl_dt
-  [../]
+  # [./TimeStepper]
+  #   type = PostprocessorDT
+  #   postprocessor = cfl_dt
+  # [../]
+  dt = 0.1
 []
 # ------------------------------------------------------------------------------
 # Outputs
@@ -480,7 +473,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
 [Outputs]
   exodus = true # Export exodus file
   csv = true # Export csv file with temp. and vel. values
-  interval = 50  # only output every 50 timesteps
+  # interval = 50  # only output every 50 timesteps
 []
 [Postprocessors]
   [cfl_dt]
