@@ -338,7 +338,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
   [rho_outlet]
     type = PCNSFVStrongBC
     boundary = 'Outlet'
-    variable = pressure
+    variable = rho
     T_fluid = ${ambient_temperature}
     pressure = ${ambient_pressure}
     eqn = 'mass'
@@ -461,11 +461,9 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
 [Executioner]
   type = Transient
   end_time = 150
-  # [TimeIntegrator]
-  #   type = ExplicitSSPRungeKutta
-  #   order = 2
-  # []
-  l_tol = 1e-6
+  dt = 0.01
+  dtmin = 1e-3
+  l_tol = 1e-7
   automatic_scaling = true
   # steady_state_detection = false
   # steady_state_tolerance = 1e-10

@@ -524,7 +524,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
   type = Transient
   end_time = 150
   dt = 0.1
-  dtmin = 1e-4
+  dtmin = 1e-3
   # [TimeIntegrator]
   #   type = ExplicitSSPRungeKutta
   #   order = 2
@@ -544,7 +544,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
 [Outputs]
   exodus = true # Export exodus file
   csv = true # Export csv file with temp. and vel. values
-  interval = 50  # only output every 50 timesteps
+  interval = 10  # only output every 50 timesteps
 []
 [Postprocessors]
   [cfl_dt]
