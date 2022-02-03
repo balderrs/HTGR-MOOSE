@@ -457,16 +457,16 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
 [Executioner]
   type = Transient
   end_time = 150
-  dt = 0.1
-  dtmin = 1e-7
+  dt = 0.01
+  dtmin = 1e-6
   l_tol = 1e-7
   automatic_scaling = true
   # steady_state_detection = false
   # steady_state_tolerance = 1e-10
-  [./TimeStepper]
-    type = PostprocessorDT
-    postprocessor = cfl_dt
-  [../]
+  # [./TimeStepper]
+  #   type = PostprocessorDT
+  #   postprocessor = cfl_dt
+  # [../]
 []
 # ------------------------------------------------------------------------------
 # Outputs
