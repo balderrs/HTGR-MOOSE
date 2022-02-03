@@ -390,7 +390,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
   [rho_outlet]
     type = PCNSFVStrongBC
     boundary = 'Outlet'
-    variable = pressure
+    variable = rho
     T_fluid = ${ambient_temperature}
     pressure = ${ambient_pressure}
     eqn = 'mass'
@@ -454,7 +454,6 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
     type = PorousConservedVarMaterial
     rho = rho
     rho_et = rho_et
-    fp = fp
     superficial_rhou = rhou
     superficial_rhov = rhov
     superficial_rhow = rhow
@@ -464,7 +463,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
   [he_func]
     type = ADGenericFunctionMaterial
     prop_names = 'muHe kHe cpHe'
-    prop_values = 'muHe kHe 5190.' # Heat capacity of He [J/kg-K]'
+    prop_values = '1 kHe 5190.' # Heat capacity of He [J/kg-K]'
     block = '1 2'
   []
   [fHTC]
@@ -475,7 +474,6 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
   []
   [sound_speed]
     type = SoundspeedMat
-    fp = fp
   []
   [porosity]
     type = GenericConstantMaterial
@@ -492,11 +490,11 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
     x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
     y = '0.13754	0.14503	0.15236	0.15955	0.1666	0.17353	0.18034	0.18705	0.19366	0.20017	0.20659	0.21294	0.2192	0.22539	0.2315	0.23755	0.24354	0.24946	0.25533	0.26113	0.26689'
   []
-  [muHe]
-    type = PiecewiseLinear # x in Kelvin and y in Pa-s
-    x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
-    y = '1.76e-05	1.85e-05	1.95e-05	2.04e-05	2.13e-05	2.22e-05	2.30e-05	2.39e-05	2.47e-05	2.55e-05	2.64e-05	2.72e-05	2.80e-05	2.88e-05	2.95e-05	3.03e-05	3.11e-05	3.18e-05	3.26e-05	3.33e-05	3.41e-05'
-  []
+  # [muHe]
+  #   type = PiecewiseLinear # x in Kelvin and y in Pa-s
+  #   x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
+  #   y = '1.76e-05	1.85e-05	1.95e-05	2.04e-05	2.13e-05	2.22e-05	2.30e-05	2.39e-05	2.47e-05	2.55e-05	2.64e-05	2.72e-05	2.80e-05	2.88e-05	2.95e-05	3.03e-05	3.11e-05	3.18e-05	3.26e-05	3.33e-05	3.41e-05'
+  # []
   # [temp_func]
   #   type = ParsedFunction
   #   # Bottom at -0.446088m, top at 1.439685 m
@@ -520,14 +518,12 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
 [Executioner]
   type = Transient
   end_time = 150
-  # [TimeIntegrator]
-  #   type = ExplicitSSPRungeKutta
-  #   order = 2
-  # []
-  l_tol = 1e-7
+  dt = 0.01
+  dtmin = 1e-4
+  l_tol = 1e-6
   automatic_scaling = true
-  steady_state_detection = false
-  steady_state_tolerance = 1e-10
+  # steady_state_detection = false
+  # steady_state_tolerance = 1e-10
   [./TimeStepper]
     type = PostprocessorDT
     postprocessor = cfl_dt
@@ -537,6 +533,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
 # Outputs
 # ------------------------------------------------------------------------------
 [Outputs]
+  checkpoint = true
   exodus = true # Export exodus file
   csv = true # Export csv file with temp. and vel. values
   interval = 50  # only output every 50 timesteps

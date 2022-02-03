@@ -68,9 +68,8 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
     variable = rho
   []
   [mass_advection]
-    type = PCNSFVKT
+    type = PCNSFVMassHLLC
     variable = rho
-    eqn = "mass"
   []
   #------ Conservation of Momentum (x-component) -------
   [momentum_x_time]
@@ -78,10 +77,9 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
     variable = rhou
   []
   [momentum_x_advection]
-    type = PCNSFVKT
+    type = PCNSFVMomentumHLLC
     variable = rhou
     momentum_component = x
-    eqn = "momentum"
   []
   [viscosity_x]
     type = FVOrthogonalDiffusion
@@ -94,10 +92,9 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
     variable = rhov
   []
   [momentum_y_advection]
-    type = PCNSFVKT
+    type = PCNSFVMomentumHLLC
     variable = rhov
     momentum_component = y
-    eqn = "momentum"
   []
   [viscosity_y]
     type = FVOrthogonalDiffusion
@@ -115,9 +112,8 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
     variable = rho_et
   []
   [fluid_energy_advection]
-    type = PCNSFVKT
+    type = PCNSFVFluidEnergyHLLC
     variable = rho_et
-    eqn = "energy"
   []
   [fluid_conduction]
     type = FVOrthogonalDiffusion
@@ -467,10 +463,10 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
   automatic_scaling = true
   # steady_state_detection = false
   # steady_state_tolerance = 1e-10
-  # [./TimeStepper]
-  #   type = PostprocessorDT
-  #   postprocessor = cfl_dt
-  # [../]
+  [./TimeStepper]
+    type = PostprocessorDT
+    postprocessor = cfl_dt
+  [../]
 []
 # ------------------------------------------------------------------------------
 # Outputs
@@ -479,6 +475,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
   exodus = true # Export exodus file
   csv = true # Export csv file with temp. and vel. values
   interval = 50  # only output every 50 timesteps
+  checkpoint = true
 []
 [Postprocessors]
   [cfl_dt]

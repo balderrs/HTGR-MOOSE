@@ -390,7 +390,7 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
   [rho_outlet]
     type = PCNSFVStrongBC
     boundary = 'Outlet'
-    variable = pressure
+    variable = rho
     T_fluid = ${ambient_temperature}
     pressure = ${ambient_pressure}
     eqn = 'mass'
@@ -523,28 +523,35 @@ P_RPV = ${fparse 146.61825*6894.75729} # Initial pressure [Pa]
 [Executioner]
   type = Transient
   end_time = 150
+  dtmax = 1
   dt = 0.1
-  dtmin = 1e-3
-  # [TimeIntegrator]
-  #   type = ExplicitSSPRungeKutta
-  #   order = 2
-  # []
-  l_tol = 1e-6
+  dtmin = 1e-5
+  l_tol = 1e-5
+  l_max_its = 50
+  nl_max_its = 25
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-7
   automatic_scaling = true
   # steady_state_detection = false
   # steady_state_tolerance = 1e-10
-  [./TimeStepper]
-    type = PostprocessorDT
-    postprocessor = cfl_dt
-  [../]
+
+  # [TimeStepper]
+  #   type = PostprocessorDT
+  #   postprocessor = cfl_dt
+  #   dt = 0.1
+    # cutback_factor_at_failure = 0.5
+    # reset_dt = true
+  # []
 []
 # ------------------------------------------------------------------------------
 # Outputs
 # ------------------------------------------------------------------------------
 [Outputs]
+  checkpoint = true
+  # print_linear_residuals = true
   exodus = true # Export exodus file
   csv = true # Export csv file with temp. and vel. values
-  interval = 10  # only output every 50 timesteps
+  interval = 50  # only output every 50 timesteps
 []
 [Postprocessors]
   [cfl_dt]
