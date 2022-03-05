@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 # Description: The following model simulates the blowdown of a scaled-down HTGR
 # as a result of a break in the RPV. The porous media compressible finite volume
-# KT is implemented to solve for the transient depressurization.
+# HLLC is implemented to solve for the transient depressurization.
 # ==============================================================================
 # MODEL PARAMETERS
 # ------------------------------------------------------------------------------
@@ -33,7 +33,6 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [fmg]
     type = FileMeshGenerator
     file = './HTGR3D_B01_V12.e'
-
   []
 []
 # ------------------------------------------------------------------------------
@@ -71,9 +70,8 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     variable = rho
   []
   [mass_advection]
-    type = PCNSFVKT
+    type = PCNSFVMassHLLC
     variable = rho
-    eqn = "mass"
   []
   #------ Conservation of Momentum (x-component) -------
   [momentum_x_time]
@@ -81,10 +79,9 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     variable = rhou
   []
   [momentum_x_advection]
-    type = PCNSFVKT
+    type = PCNSFVMomentumHLLC
     variable = rhou
     momentum_component = x
-    eqn = "momentum"
   []
   [viscosity_x]
     type = FVOrthogonalDiffusion
@@ -97,10 +94,9 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     variable = rhov
   []
   [momentum_y_advection]
-    type = PCNSFVKT
+    type = PCNSFVMomentumHLLC
     variable = rhov
     momentum_component = y
-    eqn = "momentum"
   []
   [viscosity_y]
     type = FVOrthogonalDiffusion
@@ -134,9 +130,8 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     variable = rho_et
   []
   [fluid_energy_advection]
-    type = PCNSFVKT
+    type = PCNSFVFluidEnergyHLLC
     variable = rho_et
-    eqn = "energy"
   []
   [fluid_conduction]
     type = FVOrthogonalDiffusion
@@ -213,7 +208,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
 # ------------------------------------------------------------------------------
 [ICs]
   [RPV_P_IC] # Initial pressure in RPV
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_RPV}
     initial_temperature = ${T_RPV}
     initial_velocity = '0 -1.0e-12 0'
@@ -222,17 +217,16 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     block = 1
   []
   [Cavity_P_IC] # Initial pressure in cavity
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'pressure'
     block = 2
   []
   [RPV_T_IC] # Initial temperature in RPV
-    # type = NSInitialCondition
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_RPV}
     initial_temperature = ${T_RPV}
     initial_velocity = '0 -1.0e-12 0'
@@ -241,16 +235,16 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     block = 1
   []
   [Cavity_T_IC] # Initial temperature in cavity
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'temperature'
     block = 2
   []
   [RPV_rho_IC]
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_RPV}
     initial_temperature = ${T_RPV}
     initial_velocity = '0 -1.0e-12 0'
@@ -259,16 +253,16 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     block = 1
   []
   [Cavity_rho_IC]
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'rho'
     block = 2
   []
   [RPV_rhou_IC]
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_RPV}
     initial_temperature = ${T_RPV}
     initial_velocity = '0 -1.0e-12 0'
@@ -277,16 +271,16 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     block = 1
   []
   [Cavity_rhou_IC]
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'rhou'
     block = 2
   []
   [RPV_rhov_IC]
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_RPV}
     initial_temperature = ${T_RPV}
     initial_velocity = '0 -1.0e-12 0'
@@ -295,16 +289,16 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     block = 1
   []
   [Cavity_rhov_IC]
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'rhov'
     block = 2
   []
   [RPV_rhow_IC]
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_RPV}
     initial_temperature = ${T_RPV}
     initial_velocity = '0 -1.0e-12 0'
@@ -313,16 +307,16 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     block = 1
   []
   [Cavity_rhow_IC]
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'rhow'
     block = 2
   []
   [RPV_rhoE_IC]
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_RPV}
     initial_temperature = ${T_RPV}
     initial_velocity = '0 -1.0e-12 0'
@@ -331,9 +325,9 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     block = 1
   []
   [Cavity_rhoE_IC]
-    type = NSFunctionInitialCondition
+    type = NSInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'rho_et'
@@ -430,11 +424,16 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     pressure = ${ambient_pressure}
     eqn = 'energy'
   []
-  [Walls_temp]
-    type = FVNeumannBC
-    variable = rho_et
-    value = ${fparse (16.2+273.15)}
+  [cold_walls]
+    type = FVThermalResistanceBC
+    geometry = cartesian
+    T_ambient = ${ambient_temperature}
+    thermal_conductivities = 45 # Thermal conductivity carbon steel [W/m-K]
+    conduction_thicknesses = 0.0047625 # Containment building thickness [m]
+    htc = 'HTC'
+    emissivity = 0 # emissivity of carbon steel [-]
     boundary = 'ContIW'
+    variable = temperature
   []
 []
 # ------------------------------------------------------------------------------
@@ -456,7 +455,6 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     rho_et = rho_et
     superficial_rhou = rhou
     superficial_rhov = rhov
-    superficial_rhow = rhow
     porosity = porosity
     block = '1 2'
   []
@@ -469,8 +467,11 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [fHTC]
     type = ADGenericConstantMaterial
     prop_names = 'HTC'
-    prop_values = 25 # Heat transfer coefficient [W/m2-K]
+    prop_values = 15 # Heat transfer coefficient [W/m2-K]
     block = '1 2'
+  []
+  [sound_speed]
+    type = SoundspeedMat
   []
   [porosity]
     type = GenericConstantMaterial
@@ -492,16 +493,11 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
     y = '1.76e-05	1.85e-05	1.95e-05	2.04e-05	2.13e-05	2.22e-05	2.30e-05	2.39e-05	2.47e-05	2.55e-05	2.64e-05	2.72e-05	2.80e-05	2.88e-05	2.95e-05	3.03e-05	3.11e-05	3.18e-05	3.26e-05	3.33e-05	3.41e-05'
   []
-  [RPV_temp_func]
-    type = ParsedFunction
-    # Change of temperature in the y axis
-    value = 272.619607+(23.78578*y)
-  []
-  [Cav_temp_func]
-    type = ParsedFunction
-    # Change of temperature in the y axis
-    value = 292.9447+(23.785781*y)
-  []
+  # [temp_func]
+  #   type = ParsedFunction
+  #   # Bottom at -0.446088m, top at 1.439685 m
+  #   value = 288.75 + 64.16 * (y+0.446088)/(1.885773)
+  # []
 []
 # ------------------------------------------------------------------------------
 # Preconditioning
@@ -519,10 +515,10 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
 # ------------------------------------------------------------------------------
 [Executioner]
   type = Transient
-  end_time = 25
+  end_time = 150
   dtmax = 1
-  dt = 0.0025
-  dtmin = 1e-6
+  dt = 0.005
+  dtmin = 1e-5
   l_tol = 1e-6
   l_max_its = 50
   nl_max_its = 25
@@ -685,19 +681,10 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     variable = pressure
     block = 1
   []
-  [Pressure_Cav]
-    type = ElementAverageValue
+  [PT-01]
+    type = PointValue
     variable = pressure
-    block = 2
-  []
-  [Temperature_RPV]
-    type = ElementAverageValue
-    variable = temperature
-    block = 1
-  []
-  [Temperature_Cav]
-    type = ElementAverageValue
-    variable = temperature
-    block = 2
+    point = '-0.260355 0.02 0'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []

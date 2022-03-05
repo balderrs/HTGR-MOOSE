@@ -89,7 +89,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [viscosity_x]
     type = FVOrthogonalDiffusion
     variable = rhou
-    coeff = 'muHe'
+    coeff = 'muAir'
   []
   #------ Conservation of Momentum (y-component) -------
   [momentum_y_time]
@@ -105,7 +105,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [viscosity_y]
     type = FVOrthogonalDiffusion
     variable = rhov
-    coeff = 'muHe'
+    coeff = 'muAir'
   []
   [y_gravity] # Gravity only acts on the y-comp.
     type = PCNSFVMomentumGravity
@@ -126,7 +126,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [viscosity_z]
     type = FVOrthogonalDiffusion
     variable = rhow
-    coeff = 'muHe'
+    coeff = 'muAir'
   []
   # ------ Conservation of Energy  (Fluid Regions)-------
   [fluid_energy_time]
@@ -141,7 +141,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [fluid_conduction]
     type = FVOrthogonalDiffusion
     variable = rho_et
-    coeff = 'kHe'
+    coeff = 'kAir'
   []
 []
 # ------------------------------------------------------------------------------
@@ -366,7 +366,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     type = FVOrthogonalBoundaryDiffusion
     function = 0
     variable = rhou
-    coeff = 'muHe'
+    coeff = 'muAir'
     diffusing_quantity = 'vel_x'
     boundary = 'RPVIW RPVOW PCV ContIW ContSP RPVSP'
   []
@@ -374,7 +374,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     type = FVOrthogonalBoundaryDiffusion
     function = 0
     variable = rhov
-    coeff = 'muHe'
+    coeff = 'muAir'
     diffusing_quantity = 'vel_y'
     boundary = 'RPVIW RPVOW PCV ContIW ContSP RPVSP'
   []
@@ -382,7 +382,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     type = FVOrthogonalBoundaryDiffusion
     function = 0
     variable = rhow
-    coeff = 'muHe'
+    coeff = 'muAir'
     diffusing_quantity = 'vel_z'
     boundary = 'RPVIW RPVOW PCV ContIW ContSP RPVSP'
   []
@@ -433,7 +433,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [Walls_temp]
     type = FVNeumannBC
     variable = rho_et
-    value = ${fparse (16.2+273.15)}
+    value = ${fparse (14.77+273.15)}
     boundary = 'ContIW'
   []
 []
@@ -444,8 +444,8 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [FluidProperties]
     [fp]
       type = IdealGasFluidProperties
-      gamma = ${fparse 5/3.} # Heat capacity ratio [-]
-      molar_mass = 4.002602e-3 # [kg/mol] molar mass of helium
+      gamma = ${fparse 7/5.} # Heat capacity ratio [-]
+      molar_mass = 28.97e-3 # [kg/mol] molar mass of air
     []
   []
 []
@@ -462,8 +462,8 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   []
   [he_func]
     type = ADGenericFunctionMaterial
-    prop_names = 'muHe kHe cpHe'
-    prop_values = 'muHe kHe 5190.' # Heat capacity of He [J/kg-K]'
+    prop_names = 'muAir kAir cpHe'
+    prop_values = 'muAir kAir 1007.48' # Average heat capacity of air [J/kg-K]
     block = '1 2'
   []
   [fHTC]
@@ -482,12 +482,12 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
 # Functions
 # ------------------------------------------------------------------------------
 [Functions]
-  [kHe]
+  [kAir]
     type = PiecewiseLinear # x in Kelvin and y in W/m-K
     x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
     y = '0.13754	0.14503	0.15236	0.15955	0.1666	0.17353	0.18034	0.18705	0.19366	0.20017	0.20659	0.21294	0.2192	0.22539	0.2315	0.23755	0.24354	0.24946	0.25533	0.26113	0.26689'
   []
-  [muHe]
+  [muAir]
     type = PiecewiseLinear # x in Kelvin and y in Pa-s
     x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
     y = '1.76e-05	1.85e-05	1.95e-05	2.04e-05	2.13e-05	2.22e-05	2.30e-05	2.39e-05	2.47e-05	2.55e-05	2.64e-05	2.72e-05	2.80e-05	2.88e-05	2.95e-05	3.03e-05	3.11e-05	3.18e-05	3.26e-05	3.33e-05	3.41e-05'
