@@ -33,7 +33,6 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [fmg]
     type = FileMeshGenerator
     file = './HTGR3D_B01_V12.e'
-
   []
 []
 # ------------------------------------------------------------------------------
@@ -71,7 +70,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     variable = rho
   []
   [mass_advection]
-    type = PCNSFVKT
+    type = GasMixPCNSFVKT
     variable = rho
     eqn = "mass"
   []
@@ -81,7 +80,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     variable = rhou
   []
   [momentum_x_advection]
-    type = PCNSFVKT
+    type = GasMixPCNSFVKT
     variable = rhou
     momentum_component = x
     eqn = "momentum"
@@ -97,7 +96,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     variable = rhov
   []
   [momentum_y_advection]
-    type = PCNSFVKT
+    type = GasMixPCNSFVKT
     variable = rhov
     momentum_component = y
     eqn = "momentum"
@@ -118,7 +117,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     variable = rhow
   []
   [momentum_z_advection]
-    type = PCNSFVKT
+    type = GasMixPCNSFVKT
     variable = rhow
     momentum_component = z
     eqn = "momentum"
@@ -134,7 +133,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     variable = rho_et
   []
   [fluid_energy_advection]
-    type = PCNSFVKT
+    type = GasMixPCNSFVKT
     variable = rho_et
     eqn = "energy"
   []
@@ -388,7 +387,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   []
   # Venting section outlet
   [rho_outlet]
-    type = PCNSFVStrongBC
+    type = GasMixPCNSFVStrongBC
     boundary = 'Outlet'
     variable = rho
     T_fluid = ${ambient_temperature}
@@ -396,7 +395,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     eqn = 'mass'
   []
   [rhou_outlet]
-    type = PCNSFVStrongBC
+    type = GasMixPCNSFVStrongBC
     boundary = 'Outlet'
     variable = rhou
     T_fluid = ${ambient_temperature}
@@ -405,7 +404,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     momentum_component = x
   []
   [rhov_outlet]
-    type = PCNSFVStrongBC
+    type = GasMixPCNSFVStrongBC
     boundary = 'Outlet'
     variable = rhov
     T_fluid = ${ambient_temperature}
@@ -414,7 +413,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     momentum_component = y
   []
   [rhow_outlet]
-    type = PCNSFVStrongBC
+    type = GasMixPCNSFVStrongBC
     boundary = 'Outlet'
     variable = rhow
     T_fluid = ${ambient_temperature}
@@ -423,7 +422,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     momentum_component = z
   []
   [rhoet_outlet]
-    type = PCNSFVStrongBC
+    type = GasMixPCNSFVStrongBC
     boundary = 'Outlet'
     variable = rho_et
     T_fluid = ${ambient_temperature}
@@ -447,10 +446,20 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
 # ------------------------------------------------------------------------------
 [Modules]
   [FluidProperties]
-    [fp]
+    [fp_helium]
       type = IdealGasFluidProperties
       gamma = ${fparse 5/3.} # Heat capacity ratio [-]
       molar_mass = 4.002602e-3 # [kg/mol] molar mass of helium
+    []
+    [fp_air]
+      type = IdealGasFluidProperties
+      gamma = ${fparse 7/5.} # Heat capacity ratio [-]
+      molar_mass = 28.97e-3 # [kg/mol] molar mass of air
+    []
+    [fp]
+      type = GasMixPHFluidProperties
+      fp_primary = fp_helium
+      fp_secondary = 'fp_air'
     []
   []
 []
@@ -469,6 +478,12 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     type = ADGenericFunctionMaterial
     prop_names = 'muHe kHe cpHe'
     prop_values = 'muHe kHe 5190.' # Heat capacity of He [J/kg-K]'
+    block = '1 2'
+  []
+  [air_func]
+    type = ADGenericFunctionMaterial
+    prop_names = 'muAir kAir cpHe'
+    prop_values = 'muAir kAir 1007.48' # Average heat capacity of air [J/kg-K]
     block = '1 2'
   []
   [fHTC]
