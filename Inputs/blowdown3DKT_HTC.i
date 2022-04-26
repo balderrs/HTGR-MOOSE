@@ -17,8 +17,8 @@ T_Cav = ${fparse (37.2+273.15)} # Initial temperature [K]
 P_Cav = 101325 # Initial pressure [Pa]
 
 # RPV --------------------------------------------------------------------------
-T_RPV = ${fparse 125.7718+273.15} # Initial temperature [K]
-P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
+T_RPV = ${fparse 197.7+273.15} # Initial temperature [K]
+P_RPV = ${fparse 168.3*6894.75729} # Initial pressure [Pa]
 # ------------------------------------------------------------------------------
 # Global Parameters
 # ------------------------------------------------------------------------------
@@ -33,7 +33,6 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [fmg]
     type = FileMeshGenerator
     file = './HTGR3D_B01_V12.e'
-
   []
 []
 # ------------------------------------------------------------------------------
@@ -430,6 +429,12 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     pressure = ${ambient_pressure}
     eqn = 'energy'
   []
+  [RPV_walls]
+    type = FVNeumannBC
+    boundary = 'RPVIW'
+    variable =
+    value = 0
+  []
   [cold_walls]
     type = FVThermalResistanceBC
     geometry = cartesian
@@ -468,7 +473,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [he_func]
     type = ADGenericFunctionMaterial
     prop_names = 'muHe kHe cpHe'
-    prop_values = 'muHe kHe 5190.' # Heat capacity of He [J/kg-K]'
+    prop_values = '2.30e-05 0.2 5190.' # Heat capacity of He [J/kg-K]'
     block = '1 2'
   []
   [fHTC]
@@ -487,16 +492,16 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
 # Functions
 # ------------------------------------------------------------------------------
 [Functions]
-  [kHe]
-    type = PiecewiseLinear # x in Kelvin and y in W/m-K
-    x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
-    y = '0.13754	0.14503	0.15236	0.15955	0.1666	0.17353	0.18034	0.18705	0.19366	0.20017	0.20659	0.21294	0.2192	0.22539	0.2315	0.23755	0.24354	0.24946	0.25533	0.26113	0.26689'
-  []
-  [muHe]
-    type = PiecewiseLinear # x in Kelvin and y in Pa-s
-    x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
-    y = '1.76e-05	1.85e-05	1.95e-05	2.04e-05	2.13e-05	2.22e-05	2.30e-05	2.39e-05	2.47e-05	2.55e-05	2.64e-05	2.72e-05	2.80e-05	2.88e-05	2.95e-05	3.03e-05	3.11e-05	3.18e-05	3.26e-05	3.33e-05	3.41e-05'
-  []
+  # [kHe]
+  #   type = PiecewiseLinear # x in Kelvin and y in W/m-K
+  #   x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
+  #   y = '0.13754	0.14503	0.15236	0.15955	0.1666	0.17353	0.18034	0.18705	0.19366	0.20017	0.20659	0.21294	0.2192	0.22539	0.2315	0.23755	0.24354	0.24946	0.25533	0.26113	0.26689'
+  # []
+  # [muHe]
+  #   type = PiecewiseLinear # x in Kelvin and y in Pa-s
+  #   x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
+  #   y = '1.76e-05	1.85e-05	1.95e-05	2.04e-05	2.13e-05	2.22e-05	2.30e-05	2.39e-05	2.47e-05	2.55e-05	2.64e-05	2.72e-05	2.80e-05	2.88e-05	2.95e-05	3.03e-05	3.11e-05	3.18e-05	3.26e-05	3.33e-05	3.41e-05'
+  # []
   [RPV_temp_func]
     type = ParsedFunction
     # Change of temperature in the y axis

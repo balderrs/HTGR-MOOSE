@@ -13,6 +13,7 @@
 ambient_pressure = 101325 # Ambient pressure [Pa]
 ambient_temperature = ${fparse (14.77+273.15)} # Initial temperature [K]
 # Containment ------------------------------------------------------------------
+T_Cav = ${fparse (37.2+273.15)} # Initial temperature [K]
 P_Cav = 101325 # Initial pressure [Pa]
 
 # RPV --------------------------------------------------------------------------
@@ -54,7 +55,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     type = MooseVariableFVReal
     block = '1 2'
   []
-  [T_fluid]
+  [temperature]
     type = MooseVariableFVReal
     block = '1 2'
   []
@@ -90,11 +91,11 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     momentum_component = x
     eqn = "momentum"
   []
-  # [viscosity_x]
-  #   type = FVOrthogonalDiffusion
-  #   variable = rhou
-  #   coeff = 'muHe'
-  # []
+  [viscosity_x]
+    type = FVOrthogonalDiffusion
+    variable = rhou
+    coeff = 'mu'
+  []
   #------ Conservation of Momentum (y-component) -------
   [momentum_y_time]
     type = FVMatPropTimeKernel
@@ -107,11 +108,11 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     momentum_component = y
     eqn = "momentum"
   []
-  # [viscosity_y]
-  #   type = FVOrthogonalDiffusion
-  #   variable = rhov
-  #   coeff = 'muHe'
-  # []
+  [viscosity_y]
+    type = FVOrthogonalDiffusion
+    variable = rhov
+    coeff = 'mu'
+  []
   [y_gravity] # Gravity only acts on the y-comp.
     type = PCNSFVMomentumGravity
     variable = rhov
@@ -129,27 +130,27 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     momentum_component = z
     eqn = "momentum"
   []
-  # [viscosity_z]
-  #   type = FVOrthogonalDiffusion
-  #   variable = rhow
-  #   coeff = 'muHe'
-  # []
+  [viscosity_z]
+    type = FVOrthogonalDiffusion
+    variable = rhow
+    coeff = 'mu'
+  []
   # ------ Conservation of Energy  (Fluid Regions)-------
   [fluid_energy_time]
     type = FVMatPropTimeKernel
-    variable = T_fluid
-    mat_prop_time_derivative = 'dsuperficial_rhoet_dt'
+    variable = temperature
+    mat_prop_time_derivative = 'dsuperficial_rho_et_dt'
   []
   [fluid_energy_advection]
     type = GasMixPCNSFVKT
-    variable = T_fluid
+    variable = temperature
     eqn = "energy"
   []
-  # [fluid_conduction]
-  #   type = FVOrthogonalDiffusion
-  #   variable = T_fluid
-  #   coeff = k
-  # []
+  [fluid_conduction]
+    type = FVOrthogonalDiffusion
+    variable = temperature
+    coeff = k
+  []
   # --------------- Mass fraction advection ---------------
   [mass_frac_time]
     type = FVMatPropTimeKernel
@@ -166,44 +167,23 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
 # AuxVariables
 # ------------------------------------------------------------------------------
 [AuxVariables]
-  [Ma]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-    block = '1 2'
-  []
   [rho]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
     block = '1 2'
   []
   [U]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-    block = '1 2'
-  []
-  [temperature]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
     block = '1 2'
   []
   [porosity]
     type = MooseVariableFVReal
+    initial_condition = 1
   []
 []
 # ------------------------------------------------------------------------------
 # AuxKernels
 # ------------------------------------------------------------------------------
 [AuxKernels]
-  [Ma_aux]
-    type = NSMachAux
-    variable = Ma
-    fluid_properties = fp
-    use_material_properties = true
-  []
   [rho_aux]
     type = ADMaterialRealAux
     variable = rho
@@ -213,11 +193,6 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     type = ADMaterialRealAux
     variable = U
     property = speed
-  []
-  [temperature_aux]
-    type = ADMaterialRealAux
-    variable = temperature
-    property = T_fluid
   []
   [porosity]
     type = MaterialRealAux
@@ -230,41 +205,52 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
 # Initial Conditions
 # ------------------------------------------------------------------------------
 [ICs]
+  [RPV_MF]
+    type = ConstantIC
+    variable = Mass_Fraction
+    value = 0.99
+    block = 1
+  []
+  [Cavity_MF]
+    type = ConstantIC
+    variable = Mass_Fraction
+    value = 0.01
+    block = 2
+  []
   [RPV_P_IC] # Initial pressure in RPV
     type = NSFunctionInitialCondition
     initial_pressure = ${P_RPV}
     initial_temperature = ${T_RPV}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp_helium
-    variable = 'pressure'
+    variable = pressure
     block = 1
   []
   [Cavity_P_IC] # Initial pressure in cavity
     type = NSFunctionInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav} #'Cav_temp_func'
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp_air
-    variable = 'pressure'
+    variable = pressure
     block = 2
   []
   [RPV_T_IC] # Initial temperature in RPV
-    # type = NSInitialCondition
     type = NSFunctionInitialCondition
     initial_pressure = ${P_RPV}
     initial_temperature = ${T_RPV}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp_helium
-    variable = 'temperature'
+    variable = temperature
     block = 1
   []
   [Cavity_T_IC] # Initial temperature in cavity
     type = NSFunctionInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav} #'Cav_temp_func'
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp_air
-    variable = 'temperature'
+    variable = temperature
     block = 2
   []
   [RPV_rho_IC]
@@ -273,16 +259,16 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     initial_temperature = ${T_RPV}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp_helium
-    variable = 'rho'
+    variable = rho
     block = 1
   []
   [Cavity_rho_IC]
     type = NSFunctionInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav} #'Cav_temp_func'
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp_air
-    variable = 'rho'
+    variable = rho
     block = 2
   []
   [RPV_rhou_IC]
@@ -291,17 +277,16 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     initial_temperature = ${T_RPV}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp_helium
-    variable = 'rhou'
+    variable = rhou
     block = 1
-
   []
   [Cavity_rhou_IC]
     type = NSFunctionInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav} #'Cav_temp_func'
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp_air
-    variable = 'rhou'
+    variable = rhou
     block = 2
   []
   [RPV_rhov_IC]
@@ -310,16 +295,16 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     initial_temperature = ${T_RPV}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp_helium
-    variable = 'rhov'
+    variable = rhov
     block = 1
   []
   [Cavity_rhov_IC]
     type = NSFunctionInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav} #'Cav_temp_func'
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp_air
-    variable = 'rhov'
+    variable = rhov
     block = 2
   []
   [RPV_rhow_IC]
@@ -328,16 +313,16 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     initial_temperature = ${T_RPV}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp_helium
-    variable = 'rhow'
+    variable = rhow
     block = 1
   []
   [Cavity_rhow_IC]
     type = NSFunctionInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav} #'Cav_temp_func'
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp_air
-    variable = 'rhow'
+    variable = rhow
     block = 2
   []
   # [RPV_rhoE_IC]
@@ -345,7 +330,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   #   initial_pressure = ${P_RPV}
   #   initial_temperature = ${T_RPV}
   #   initial_velocity = '0 -1.0e-12 0'
-  #   fluid_properties = fp_helium
+  #   fluid_properties = fp
   #   variable = 'rho_et'
   #   block = 1
   # []
@@ -354,7 +339,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   #   initial_pressure = ${P_Cav}
   #   initial_temperature = 'Cav_temp_func'
   #   initial_velocity = '0 -1.0e-12 0'
-  #   fluid_properties = fp_air
+  #   fluid_properties = fp
   #   variable = 'rho_et'
   #   block = 2
   # []
@@ -381,30 +366,31 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     momentum_component = z
     boundary = 'RPVIW RPVOW PCV ContIW ContSP RPVSP'
   []
-  # [shear_x_walls]
-  #   type = FVOrthogonalBoundaryDiffusion
-  #   function = 0
-  #   variable = rhou
-  #   coeff = 'muHe'
-  #   diffusing_quantity = 'vel_x'
-  #   boundary = 'RPVIW RPVOW PCV ContIW ContSP RPVSP'
-  # []
-  # [shear_y_walls]
-  #   type = FVOrthogonalBoundaryDiffusion
-  #   function = 0
-  #   variable = rhov
-  #   coeff = 'muHe'
-  #   diffusing_quantity = 'vel_y'
-  #   boundary = 'RPVIW RPVOW PCV ContIW ContSP RPVSP'
-  # []
-  # [shear_z_walls]
-  #   type = FVOrthogonalBoundaryDiffusion
-  #   function = 0
-  #   variable = rhow
-  #   coeff = 'muHe'
-  #   diffusing_quantity = 'vel_z'
-  #   boundary = 'RPVIW RPVOW PCV ContIW ContSP RPVSP'
-  # []
+  [shear_x_walls]
+    type = FVOrthogonalBoundaryDiffusion
+    function = 0
+    variable = rhou
+    coeff = mu
+    diffusing_quantity = 'vel_x'
+    boundary = 'RPVIW RPVOW PCV ContIW ContSP RPVSP'
+  []
+  [shear_y_walls]
+    type = FVOrthogonalBoundaryDiffusion
+    function = 0
+    variable = rhov
+    coeff = mu
+    diffusing_quantity = 'vel_y'
+    boundary = 'RPVIW RPVOW PCV ContIW ContSP RPVSP'
+  []
+  [shear_z_walls]
+    type = FVOrthogonalBoundaryDiffusion
+    function = 0
+    variable = rhow
+    coeff = mu
+    diffusing_quantity = 'vel_z'
+    boundary = 'RPVIW RPVOW PCV ContIW ContSP RPVSP'
+  []
+
   # Venting section outlet
   [rho_outlet]
     type = GasMixPCNSFVStrongBC
@@ -440,7 +426,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [rhoet_outlet]
     type = GasMixPCNSFVStrongBC
     boundary = 'Outlet'
-    variable = T_fluid
+    variable = temperature
     pressure = ${ambient_pressure}
     eqn = 'energy'
   []
@@ -451,6 +437,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     pressure = ${ambient_pressure}
     eqn = 'scalar'
   []
+  # Walls
   [RPV_walls]
     type = FVThermalResistanceBC
     geometry = cartesian
@@ -468,7 +455,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     T_ambient = ${ambient_temperature}
     thermal_conductivities = 45 # Thermal conductivity carbon steel [W/m-K]
     conduction_thicknesses = 0.0047625 # Containment building thickness [m]
-    htc = 'HTC'
+    htc = 'SS_HTC'
     emissivity = 0 # emissivity of carbon steel [-]
     boundary = 'ContIW'
     variable = temperature
@@ -481,15 +468,19 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [FluidProperties]
     [fp_helium]
       type = IdealGasFluidProperties
-      gamma = ${fparse 5/3.} # Heat capacity ratio [-]
+      gamma = ${fparse 5.0/3.0} # Heat capacity ratio [-]
       molar_mass = 4.002602e-3 # [kg/mol] molar mass of helium
-      # k = 0.13754
-      # mu = 1.76e-05
+      k = 0.13754
+      mu = 1.76e-05
     []
     [fp_air]
       type = IdealGasFluidProperties
-      gamma = ${fparse 7/5.} # Heat capacity ratio [-]
-      molar_mass = 28.97e-3 # [kg/mol] molar mass of air
+      gamma = ${fparse 5.0/3.0} # Heat capacity ratio [-]
+      molar_mass = 4.002602e-3 # [kg/mol] molar mass of helium
+      k = 0.13754
+      mu = 1.76e-05
+      # gamma = ${fparse 7.0/5.0} # Heat capacity ratio [-]
+      # molar_mass = 28.97e-3 # [kg/mol] molar mass of air
       # k = 0.02241
       # mu = 1.606e-05
     []
@@ -513,28 +504,12 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
     porosity = porosity
     block = '1 2'
   []
-  # [var_mat]
-  #   type = PorousConservedVarMaterial
-  #   rho = rho
-  #   rho_et = rho_et
-  #   superficial_rhou = rhou
-  #   superficial_rhov = rhov
-  #   superficial_rhow = rhow
-  #   porosity = porosity
-  #   block = '1 2'
-  # []
-  # [he_func]
-  #   type = ADGenericFunctionMaterial
-  #   prop_names = 'muHe kHe cpHe'
-  #   prop_values = 'muHe kHe 5190.' # Heat capacity of He [J/kg-K]'
-  #   block = '1 2'
-  # []
-  # [air_func]
-  #   type = ADGenericFunctionMaterial
-  #   prop_names = 'muAir kAir cpHe'
-  #   prop_values = 'muAir kAir 1007.48' # Average heat capacity of air [J/kg-K]
-  #   block = '1 2'
-  # []
+  [fluid_props]
+    type = GasMixPronghornFluidProps
+    fractions = Mass_Fraction
+    porosity = porosity
+    characteristic_length = 1
+  []
   [HTC_f_1]
     type = ADGenericConstantMaterial
     prop_names = 'CS_HTC'
@@ -544,7 +519,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [HTC_f_2]
     type = ADGenericConstantMaterial
     prop_names = 'SS_HTC'
-    prop_values = 50 # Heat transfer coefficient [W/m2-K]
+    prop_values = 1000 # Heat transfer coefficient [W/m2-K]
     block = '1 2'
   []
   [porosity]
@@ -604,10 +579,13 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
 # ------------------------------------------------------------------------------
 [Executioner]
   type = Transient
+  # TIme stepping parameters
   end_time = 25
   dtmax = 1
   dt = 0.0025
   dtmin = 1e-6
+
+  # Solver parameters
   l_tol = 1e-6
   l_max_its = 50
   nl_max_its = 25
@@ -624,8 +602,16 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   checkpoint = true
   exodus = true # Export exodus file
   csv = true # Export csv file with temp. and vel. values
-  interval = 40  # only output every 40 timesteps
+  interval = 10  # only output every 40 timesteps
+  print_nonlinear_converged_reason = true
+  print_linear_residuals = true
 []
+[Debug]
+  show_var_residual_norms = true
+[]
+# [Problem]
+#   solve = false
+# []
 [Postprocessors]
   [TC01]
     type = PointValue

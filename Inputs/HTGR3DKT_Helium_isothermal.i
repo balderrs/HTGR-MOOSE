@@ -222,7 +222,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [Cavity_P_IC] # Initial pressure in cavity
     type = NSFunctionInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'pressure'
@@ -241,7 +241,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [Cavity_T_IC] # Initial temperature in cavity
     type = NSFunctionInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'temperature'
@@ -259,7 +259,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [Cavity_rho_IC]
     type = NSFunctionInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'rho'
@@ -277,7 +277,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [Cavity_rhou_IC]
     type = NSFunctionInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'rhou'
@@ -295,7 +295,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [Cavity_rhov_IC]
     type = NSFunctionInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'rhov'
@@ -313,7 +313,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [Cavity_rhow_IC]
     type = NSFunctionInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'rhow'
@@ -331,7 +331,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [Cavity_rhoE_IC]
     type = NSFunctionInitialCondition
     initial_pressure = ${P_Cav}
-    initial_temperature = 'Cav_temp_func'
+    initial_temperature = ${T_Cav}
     initial_velocity = '0 -1.0e-12 0'
     fluid_properties = fp
     variable = 'rho_et'
@@ -453,7 +453,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [FluidProperties]
     [fp]
       type = IdealGasFluidProperties
-      gamma = ${fparse 5/3.} # Heat capacity ratio [-]
+      gamma = ${fparse 5.0/3.0} # Heat capacity ratio [-]
       molar_mass = 4.002602e-3 # [kg/mol] molar mass of helium
     []
   []
@@ -472,7 +472,7 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
   [he_func]
     type = ADGenericFunctionMaterial
     prop_names = 'muHe kHe cpHe'
-    prop_values = 'muHe kHe 5190.' # Heat capacity of He [J/kg-K]'
+    prop_values = '2.2e-5 0.17 5190.' # Heat capacity of He [J/kg-K]'
     block = '1 2'
   []
   [HTC_f_1]
@@ -496,28 +496,28 @@ P_RPV = ${fparse 161.31415*6894.75729} # Initial pressure [Pa]
 # ------------------------------------------------------------------------------
 # Functions
 # ------------------------------------------------------------------------------
-[Functions]
-  [kHe]
-    type = PiecewiseLinear # x in Kelvin and y in W/m-K
-    x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
-    y = '0.13754	0.14503	0.15236	0.15955	0.1666	0.17353	0.18034	0.18705	0.19366	0.20017	0.20659	0.21294	0.2192	0.22539	0.2315	0.23755	0.24354	0.24946	0.25533	0.26113	0.26689'
-  []
-  [muHe]
-    type = PiecewiseLinear # x in Kelvin and y in Pa-s
-    x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
-    y = '1.76e-05	1.85e-05	1.95e-05	2.04e-05	2.13e-05	2.22e-05	2.30e-05	2.39e-05	2.47e-05	2.55e-05	2.64e-05	2.72e-05	2.80e-05	2.88e-05	2.95e-05	3.03e-05	3.11e-05	3.18e-05	3.26e-05	3.33e-05	3.41e-05'
-  []
-  [RPV_temp_func]
-    type = ParsedFunction
-    # Change of temperature in the y axis
-    value = 272.619607+(23.78578*y)
-  []
-  [Cav_temp_func]
-    type = ParsedFunction
-    # Change of temperature in the y axis
-    value = 292.9447+(23.785781*y)
-  []
-[]
+# [Functions]
+#   [kHe]
+#     type = PiecewiseLinear # x in Kelvin and y in W/m-K
+#     x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
+#     y = '0.13754	0.14503	0.15236	0.15955	0.1666	0.17353	0.18034	0.18705	0.19366	0.20017	0.20659	0.21294	0.2192	0.22539	0.2315	0.23755	0.24354	0.24946	0.25533	0.26113	0.26689'
+#   []
+#   [muHe]
+#     type = PiecewiseLinear # x in Kelvin and y in Pa-s
+#     x = '250	270	290	310	330	350	370	390	410	430	450	470	490	510	530	550	570	590	610	630	650'
+#     y = '1.76e-05	1.85e-05	1.95e-05	2.04e-05	2.13e-05	2.22e-05	2.30e-05	2.39e-05	2.47e-05	2.55e-05	2.64e-05	2.72e-05	2.80e-05	2.88e-05	2.95e-05	3.03e-05	3.11e-05	3.18e-05	3.26e-05	3.33e-05	3.41e-05'
+#   []
+#   [RPV_temp_func]
+#     type = ParsedFunction
+#     # Change of temperature in the y axis
+#     value = 272.619607+(23.78578*y)
+#   []
+#   [Cav_temp_func]
+#     type = ParsedFunction
+#     # Change of temperature in the y axis
+#     value = 292.9447+(23.785781*y)
+#   []
+# []
 # ------------------------------------------------------------------------------
 # Preconditioning
 # ------------------------------------------------------------------------------
